@@ -1,43 +1,38 @@
-import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { AppState } from '../app/store'; // Adjust the path as necessary
-import { setAnchorElNav, setAnchorElUser, clearAnchorEls } from '../slices/navSlice';
+import * as React from 'react';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import Menu from '@mui/material/Menu';
+import MenuIcon from '@mui/icons-material/Menu';
 import Container from '@mui/material/Container';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
-import MenuIcon from '@mui/icons-material/Menu';
 import AdbIcon from '@mui/icons-material/Adb';
 
 const pages = ['Products', 'Pricing', 'Blog'];
 const settings = ['Profile', 'Account', 'Dashboard', 'Logout'];
 
-function Navbar() {
-  const dispatch = useDispatch();
-  const anchorElNav = useSelector((state: AppState) => state.nav.anchorElNav);
-  const anchorElUser = useSelector((state: AppState) => state.nav.anchorElUser);
+function ResponsiveAppBar() {
+  const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
+  const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
-    dispatch(setAnchorElNav(event.currentTarget));
+    setAnchorElNav(event.currentTarget);
   };
-
   const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
-    dispatch(setAnchorElUser(event.currentTarget));
+    setAnchorElUser(event.currentTarget);
   };
 
   const handleCloseNavMenu = () => {
-    dispatch(clearAnchorEls());
+    setAnchorElNav(null);
   };
 
   const handleCloseUserMenu = () => {
-    dispatch(clearAnchorEls());
+    setAnchorElUser(null);
   };
 
   return (
@@ -161,5 +156,4 @@ function Navbar() {
     </AppBar>
   );
 }
-
-export default Navbar;
+export default ResponsiveAppBar;
