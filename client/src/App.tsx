@@ -1,10 +1,13 @@
 import './App.css'
-import Navbar from './components/Navbar'
+import Login from './pages/Login.tsx'
+import Signup from './pages/Signup.tsx'
 function App() {
 
   return (
     <>
-     <Navbar></Navbar>
+     <Login></Login>
+     {/* <Signup></Signup> */}
+     
     </>
   )
 }
