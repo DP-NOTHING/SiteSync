@@ -32,15 +32,18 @@ const NavBar: React.FC<NavBarProps> = ({
     null
   );
 
+
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget);
   };
   const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElUser(event.currentTarget);
   };
+
   const handleCloseNavMenu = () => {
     setAnchorElNav(null);
   };
+
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
   };
@@ -175,3 +178,4 @@ const NavBar: React.FC<NavBarProps> = ({
 };
 
 export default NavBar;
+
