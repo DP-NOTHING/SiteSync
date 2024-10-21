@@ -9,7 +9,17 @@ import { Typography } from "@mui/material";
 import Box from "@mui/material/Box";
 
 function App() {
-  const [selectedPage, setSelectedPage] = useState("Home");
+  const router = createBrowserRouter([
+    {
+      element: <SignInPage />,
+      path: "/sign-in",
+    },
+    {
+      element:<SignUpPage/>,
+      path:"/sign-up",
+    },
+  ]);
+    const [selectedPage, setSelectedPage] = useState("Home");
   const [selectedSetting, setSelectedSetting] = useState("");
 
   const renderContent = () => {
