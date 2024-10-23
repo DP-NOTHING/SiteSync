@@ -33,7 +33,6 @@ const NavBar: React.FC<NavBarProps> = ({
     null
   );
 
-
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget);
   };
@@ -68,7 +67,7 @@ const NavBar: React.FC<NavBarProps> = ({
   const navigate = useNavigate();
   return (
     <>
-      <AppBar position="static">
+      <AppBar position="fixed">
         <Container maxWidth="xl">
           <Toolbar disableGutters>
             <AdbIcon sx={{ display: { xs: "none", md: "flex" }, mr: 1 }} />
@@ -138,16 +137,20 @@ const NavBar: React.FC<NavBarProps> = ({
             </Box>
 
             <Box sx={{ flexGrow: 0 }}>
-             
-                <IconButton sx={{ p: 0 }}>
-                  <UserButton/>
-                  <SignedOut>
+              <IconButton sx={{ p: 0 }}>
+                <UserButton />
+                <SignedOut>
                   <Tooltip title="Sign in">
-                    <div onClick={()=>{navigate("/sign-in")}}>Sign in</div></Tooltip>
-                  </SignedOut>
-                </IconButton>
-              
-             
+                    <div
+                      onClick={() => {
+                        navigate("/sign-in");
+                      }}
+                    >
+                      Sign in
+                    </div>
+                  </Tooltip>
+                </SignedOut>
+              </IconButton>
             </Box>
           </Toolbar>
         </Container>
@@ -157,4 +160,3 @@ const NavBar: React.FC<NavBarProps> = ({
 };
 
 export default NavBar;
-
