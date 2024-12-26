@@ -56,7 +56,7 @@ async function init() {
       publishLog(`uploading ${file}`);
 
       const command = new PutObjectCommand({
-        Bucket: "vercel-clone-outputs",
+        Bucket: "sitesync-output",
         Key: `__outputs/${PROJECT_ID}/${file}`,
         Body: fs.createReadStream(filePath),
         ContentType: mime.lookup(filePath),
