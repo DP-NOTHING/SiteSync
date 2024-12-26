@@ -17,15 +17,16 @@ const SignUpPage = (props: Props) => {
     lastName: "Patel",
   };
   return (
-    <SignedOut>
-      <SignUp
-        path="/sign-up"
-        initialValues={initialvalues}
-        routing="path"
-        signInUrl="sign-in"
-        fallbackRedirectUrl="/dashboard"
-      />
-    </SignedOut>
+    <div className="center-container">
+      <SignedOut>
+        <SignUp
+          path="/sign-up"
+          routing="path"
+          signInUrl="sign-in"
+          fallbackRedirectUrl="/dashboard"
+        />
+      </SignedOut>
+    </div>
   );
 };
 

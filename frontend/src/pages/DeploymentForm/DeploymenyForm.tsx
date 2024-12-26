@@ -16,15 +16,18 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import { io } from "socket.io-client";
+import { useAuth } from "@clerk/clerk-react";
 const socket = io("http://localhost:9002");
 
 const DeploymentForm = () => {
   const [githubUrl, setGithubUrl] = useState<string>("");
   const [projectId, setProjectId] = useState<string>("");
+  const [giturlError, setGiturlError] = useState<string>("");
+  const [idError, setIdError] = useState<string>("");
   const [logs, setLogs] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-
+  const user = useAuth();
   const [deployPreviewURL, setDeployPreviewURL] = useState<
     string | undefined
   >();
@@ -33,48 +36,105 @@ const DeploymentForm = () => {
   const handleGithubUrlChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setGithubUrl(e.target.value);
+      setGiturlError("");
     },
     []
   );
 
+  // const validProjectId = (projectId: string) => {
+  //   return axios
+  //     .get(`${import.meta.env.VITE_BACKEND_URL}/checkid`, {
+  //       params: { projectId: projectId },
+  //     })
+  //     .then((response) => response.data === true)
+  //     .catch(() => true);
+  // };
+  // const validProjectId = async (projectId: string) => {
+  //   try {
+  //     const response = await axios.get(
+  //       `
+  //       ${import.meta.env.VITE_BACKEND_URL}/checkid`,
+  //       {
+  //         params: { projectId: projectId },
+  //       }
+  //     );
+  //     console.log(response.data);
+  //     console.log("asqwwwwwwwwwwwwwwwwww");
+  //   } catch (error) {
+  //     return true;
+  //   }
+  // };
+  const validateUrl = (url: string): boolean => {
+    const regex =
+      /^(https?:\/\/)?(www\.)?github\.com\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+\/?$/;
+    return regex.test(url);
+  };
   const handleProjectIdChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setProjectId(e.target.value);
+      setIdError("");
     },
     []
   );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    // setLogs("Starting deployment...\n");
+    if (!validateUrl(githubUrl)) {
+      setGiturlError("Invalid GitHub URL");
+      return;
+    }
 
     axios
-      .post(`${process.env.BACKEND_URL}/project`, {
-        gitURL: githubUrl,
-        slug: projectId,
+      .get(`${import.meta.env.VITE_BACKEND_URL}/checkid`, {
+        params: { projectid: projectId },
       })
       .then((response) => {
-        const { projectSlug, url } = response.data.data;
-        setProjectId(projectSlug);
-        setDeployPreviewURL(url);
+        if (response.data === true) {
+          console.log(response);
+          setLogs(["Starting deployment...\n"]);
+          axios
+            .post(`${import.meta.env.VITE_BACKEND_URL}/project`, {
+              gitURL: githubUrl,
+              slug: projectId,
+            })
+            .then((response) => {
+              const { projectSlug, url } = response.data.data;
+              setProjectId(projectSlug);
+              setDeployPreviewURL(url);
 
-        console.log(`Subscribing to logs:${projectSlug}`);
-        socket.emit("subscribe", `logs:${projectSlug}`);
+              axios.post(`${import.meta.env.VITE_BACKEND_URL}/add-project`, {
+                userid: user.userId,
+                projectname: projectSlug,
+                giturl: githubUrl,
+              });
+
+              console.log(`Subscribing to logs:${projectSlug}`);
+              socket.emit("subscribe", `logs:${projectSlug}`);
+            })
+            .catch((error) => {
+              console.error(error);
+            });
+        } else {
+          setIdError("Project ID already exists");
+          return;
+        }
       })
-      .catch((error) => {
-        console.error(error);
+      .catch((err) => {
+        console.log(err);
+        return;
       });
   };
 
   const handleSocketIncommingMessage = useCallback((message: string) => {
     console.log(`[Incomming Socket Message]:`, typeof message, message);
+    console.log(message);
     const { log } = JSON.parse(message);
     if (log.includes("Done")) {
       setIsSuccess(true);
       setIsLoading(false);
     }
     setLogs((prev) => [...prev, log]);
+    console.log(log);
     logContainerRef.current?.scrollIntoView({ behavior: "smooth" });
   }, []);
 
@@ -102,6 +162,28 @@ const DeploymentForm = () => {
             margin="normal"
             value={githubUrl}
             onChange={handleGithubUrlChange}
+            error={!!giturlError}
+            helperText={giturlError}
+            sx={{
+              input: { color: "white" },
+              "& .MuiOutlinedInput-root": {
+                "& fieldset": {
+                  borderColor: "rgba(255, 255, 255, 0.7)",
+                },
+                "&:hover fieldset": {
+                  borderColor: "white",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "#8b5cf6",
+                },
+              },
+              "& .MuiFormLabel-root": {
+                color: "rgba(255, 255, 255, 0.7)",
+              },
+              "& .MuiFormLabel-root.Mui-focused": {
+                color: "white",
+              },
+            }}
             required
           />
           <TextField
@@ -111,7 +193,29 @@ const DeploymentForm = () => {
             margin="normal"
             value={projectId}
             onChange={handleProjectIdChange}
+            helperText={idError}
+            error={!!idError}
             required
+            sx={{
+              input: { color: "white" },
+              "& .MuiOutlinedInput-root": {
+                "& fieldset": {
+                  borderColor: "rgba(255, 255, 255, 0.7)",
+                },
+                "&:hover fieldset": {
+                  borderColor: "white",
+                },
+                "&.Mui-focused fieldset": {
+                  borderColor: "#8b5cf6",
+                },
+              },
+              "& .MuiFormLabel-root": {
+                color: "rgba(255, 255, 255, 0.7)",
+              },
+              "& .MuiFormLabel-root.Mui-focused": {
+                color: "white",
+              },
+            }}
           />
           <Box sx={{ mt: 2 }}>
             <Button

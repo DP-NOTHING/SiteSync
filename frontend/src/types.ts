@@ -13,3 +13,11 @@ export interface SiteListProps {
 export interface SiteDetailsProps {
   selectedSite: Site | null;
 }
+
+export interface SiteDetail {
+  deploymentdate: string;
+  userid: string;
+  url: string;
+  giturl: string;
+  projectname: string;
+}

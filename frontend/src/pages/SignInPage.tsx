@@ -10,9 +10,16 @@ const SignInPage = (props: Props) => {
   };
 
   return (
-    <SignedOut>
-      <SignIn path="/sign-in" routing="path" signUpUrl="sign-up" />
-    </SignedOut>
+    <div className="center-container">
+      <SignedOut>
+        <SignIn
+          path="/sign-in"
+          routing="path"
+          signUpUrl="sign-up"
+          fallbackRedirectUrl="/dashboard"
+        />
+      </SignedOut>
+    </div>
   );
 };
 

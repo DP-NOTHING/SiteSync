@@ -1,9 +1,11 @@
 // SiteManagement.tsx
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Box, styled } from "@mui/material";
 import SiteList from "./SiteList";
 import SiteDetails from "./SiteDetails";
 import { Site } from "../types";
+import { useAuth } from "@clerk/clerk-react";
+import axios from "axios";
 
 const MainContainer = styled(Box)({
   display: "flex",
@@ -13,32 +15,41 @@ const MainContainer = styled(Box)({
 
 const SiteManagement: React.FC = () => {
   const [selectedSiteId, setSelectedSiteId] = useState<string | null>(null);
+  const [sites, setSites] = useState<Site[]>([]);
+  const user = useAuth();
+  useEffect(() => {
+    const fetchSites = async () => {
+      try {
+        await axios
+          .get(`${import.meta.env.VITE_BACKEND_URL}/get-projects`, {
+            params: {
+              userId: user.userId,
+            },
+          })
+          .then((response) => {
+            console.log(response);
+            setSites(response.data);
+          })
+          .catch((error) => {
+            console.error("Error fetching sites:", error);
+          });
+      } catch (error) {
+        console.error("Error fetching sites:", error);
+      }
+    };
 
-  const sampleSites: Site[] = [
-    { id: "1", name: "Site Alpha" },
-    { id: "2", name: "Site Beta" },
-    { id: "3", name: "Site Gamma" },
-    { id: "4", name: "Site Beta" },
-    { id: "5", name: "Site Gamma" },
-    { id: "6", name: "Site Beta" },
-    { id: "7", name: "Site Gamma" },
-    { id: "8", name: "Site Beta" },
-    { id: "9", name: "Site Gamma" },
-    { id: "10", name: "Site Beta" },
-    { id: "11", name: "Site Gamma" },
-    { id: "12", name: "Site Beta" },
-    { id: "13", name: "Site Gamma" },
-    { id: "14", name: "Site Beta" },
-    { id: "15", name: "Site Gamma" },
-  ];
+    fetchSites();
+  }, []);
 
-  const selectedSite =
-    sampleSites.find((site) => site.id === selectedSiteId) || null;
+  const selectedSite = useMemo(
+    () => sites.find((site) => site.id === selectedSiteId) || null,
+    [sites, selectedSiteId]
+  );
 
   return (
     <MainContainer>
       <SiteList
-        sites={sampleSites}
+        sites={sites}
         selectedSiteId={selectedSiteId}
         onSiteSelect={setSelectedSiteId}
       />
