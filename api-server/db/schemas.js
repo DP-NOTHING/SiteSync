@@ -30,7 +30,7 @@ const ProjectListSchema = new mongoose.Schema({
     require: true,
   },
   projectlist: {
-    type: [ObjectId],
+    type: [String],
     require: true,
   },
 });

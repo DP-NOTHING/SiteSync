@@ -1,8 +1,10 @@
 const express = require("express");
 const { generateSlug } = require("random-word-slugs");
-const { ECSClient, RunTaskCommand } = require("@aws-sdk/client-ecs");
+const { ECSClient, RunTaskCommand, ECS } = require("@aws-sdk/client-ecs");
 const { Server } = require("socket.io");
+const { default: axios } = require("axios");
 const Redis = require("ioredis");
+
 require("dotenv").config();
 
 const { connect } = require("./db/connection.js");
@@ -20,23 +22,27 @@ const SOCKET_PORT = process.env.SOCKET_PORT || 9002;
 const AWS_REGION = process.env.AWS_REGION;
 const AWS_ACCESS_KEY_ID = process.env.AWS_ACCESS_KEY_ID;
 const AWS_SECRET_ACCESS_KEY = process.env.AWS_SECRET_ACCESS_KEY;
-const ECS_CLUSTER = process.env.CLUSTER;
-const ECS_TASK = process.env.TASK;
-
+const ECS_CLUSTER = process.env.ECS_CLUSTER;
+const ECS_TASK = process.env.ECS_TASK;
+const SUBNET1 = process.env.SUBNET1;
+const SUBNET2 = process.env.SUBNET2;
+const SUBNET3 = process.env.SUBNET3;
+const SECURITY_GROUP = process.env.SECURITY_GROUP;
+const ELASTIC_URL = process.env.ELASTIC_URL;
 const subscriber = new Redis(REDIS_URL);
 
-const io = new Server({ cors: "*" });
+const io = new Server({
+  cors: {
+    origin: "*",
+  },
+});
 
 io.on("connection", (socket) => {
   socket.on("subscribe", (channel) => {
     socket.join(channel);
-    socket.emit("message", `Joined ${channel}`);
+    socket.emit("message", JSON.stringify({ log: `Joined logs:${channel}` }));
   });
 });
-
-io.listen(SOCKET_PORT, () =>
-  console.log(`Socket Server ${SOCKET_PORT} Running..`)
-);
 
 const ecsClient = new ECSClient({
   region: AWS_REGION,
@@ -52,7 +58,15 @@ const config = {
 };
 
 app.use(express.json());
-
+app.get("/checkid", async (req, res) => {
+  const { projectid } = req.query;
+  try {
+    const resp = await axios.get(`${ELASTIC_URL}/${projectid}`);
+    return res.send(false);
+  } catch (e) {
+    return res.send(true);
+  }
+});
 app.post("/add-project", async (req, res) => {
   const { userid, projectname, giturl } = req.body;
   const project = new Project({
@@ -69,12 +83,12 @@ app.post("/add-project", async (req, res) => {
   });
 
   if (addProject) {
-    addProject.projectlist.push(project._id);
+    addProject.projectlist.push(project.projectname);
     await addProject.save();
   } else {
     const projectList = new ProjectList({
       userid,
-      projectlist: [project._id],
+      projectlist: [project.projectname],
     });
     await projectList.save();
   }
@@ -83,43 +97,78 @@ app.post("/add-project", async (req, res) => {
 });
 
 app.get("/get-projects", async (req, res) => {
-  const { userid } = req.query;
-  const projectList = await ProjectList.findOne({ userid }).populate(
-    "projectlist"
-  );
-  return res.json(projectList);
+  const { userId } = req.query;
+  console.log(userId);
+  const document = await ProjectList.findOne({
+    userid: userId,
+  });
+  if (!document) {
+    return res.status(404).json({ error: "No projects found for this user" });
+  }
+
+  const transformedProjectList = document.projectlist.map((projectid) => ({
+    id: projectid,
+    name: projectid,
+  }));
+
+  return res.status(200).json(transformedProjectList);
+});
+
+app.get("/get-project", async (req, res) => {
+  const { projectId } = req.query;
+  const project = await Project.findOne({
+    projectname: projectId,
+  });
+
+  if (!project) {
+    return res.status(404).json({ error: "No project found" });
+  }
+
+  return res.json(project);
 });
 
 app.post("/project", async (req, res) => {
-  // const { gitURL, slug } = req.body;
-  // const projectSlug = slug ? slug : generateSlug();
+  const { gitURL, slug } = req.body;
+  // console.log(
+  //   "----inside project----------------------------------------------------------------------------------------------------------------------"
+  // );
+  // console.log(req);
+  // console.log(
+  //   "----finish project----------------------------------------------------------------------------------------------------------------------"
+  // );
+  const projectSlug = slug ? slug : generateSlug();
+  // console.log(ECS_CLUSTER, ECS_TASK, SUBNET1, SUBNET2, SUBNET3, SECURITY_GROUP);
+  // console.log("ASfasf");
+  const command = new RunTaskCommand({
+    cluster: config.CLUSTER,
+    taskDefinition: ECS_TASK,
+    launchType: "FARGATE",
+    count: 1,
+    networkConfiguration: {
+      awsvpcConfiguration: {
+        assignPublicIp: "ENABLED",
+        subnets: [SUBNET1, SUBNET2, SUBNET3],
+        securityGroups: [SECURITY_GROUP],
+      },
+    },
+    overrides: {
+      containerOverrides: [
+        {
+          name: "builder-image",
+          environment: [
+            { name: "GIT_REPOSITORY__URL", value: gitURL },
+            { name: "PROJECT_ID", value: projectSlug },
+            { name: "AWS_REGION", value: AWS_REGION },
+            { name: "AWS_ACCESS_KEY_ID", value: AWS_ACCESS_KEY_ID },
+            { name: "AWS_SECRET_ACCESS_KEY", value: AWS_SECRET_ACCESS_KEY },
+            { name: "REDIS_URL", value: REDIS_URL },
+          ],
+        },
+      ],
+    },
+  });
 
-  // const command = new RunTaskCommand({
-  //   cluster: config.CLUSTER,
-  //   taskDefinition: config.TASK,
-  //   launchType: "FARGATE",
-  //   count: 1,
-  //   networkConfiguration: {
-  //     awsvpcConfiguration: {
-  //       assignPublicIp: "ENABLED",
-  //       subnets: ["", "", ""],
-  //       securityGroups: [""],
-  //     },
-  //   },
-  //   overrides: {
-  //     containerOverrides: [
-  //       {
-  //         name: "builder-image",
-  //         environment: [
-  //           { name: "GIT_REPOSITORY__URL", value: gitURL },
-  //           { name: "PROJECT_ID", value: projectSlug },
-  //         ],
-  //       },
-  //     ],
-  //   },
-  // });
-
-  // await ecsClient.send(command);
+  await ecsClient.send(command);
 
   return res.json({
     status: "queued",
@@ -143,6 +192,9 @@ app.get("/test", (req, res) => {
 
 app.listen(PORT, async () => {
   const connected = await connect();
+  io.listen(SOCKET_PORT, () =>
+    console.log(`Socket Server ${SOCKET_PORT} Running..`)
+  );
   connected
     ? console.log(`coonected to DB\nServer is running on PORT: ${PORT}
 -------------------------------------`)
