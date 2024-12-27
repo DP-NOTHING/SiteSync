@@ -136,6 +136,7 @@ const HeroSection: React.FC<HeroProps> = ({}) => {
                 <Button
                   variant="contained"
                   size="large"
+                  href="/new"
                   sx={{
                     background: "linear-gradient(45deg, #6366f1, #8b5cf6)",
                     "&:hover": {
@@ -148,6 +149,7 @@ const HeroSection: React.FC<HeroProps> = ({}) => {
                 <Button
                   variant="outlined"
                   size="large"
+                  href="https://github.com/DP-NOTHING/SiteSync.git"
                   sx={{
                     borderColor: "rgba(255, 255, 255, 0.3)",
                     color: "white",
@@ -157,7 +159,7 @@ const HeroSection: React.FC<HeroProps> = ({}) => {
                     },
                   }}
                 >
-                  Documentation
+                  Code
                 </Button>
               </Box>
             </Box>

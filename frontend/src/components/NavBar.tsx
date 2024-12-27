@@ -31,6 +31,10 @@ const pages = [
     url: "/dashboard",
   },
   {
+    title: "Monitoring",
+    url: "/monitors",
+  },
+  {
     title: "Contact us",
     url: "/contact",
   },
@@ -168,7 +172,7 @@ function NavBar() {
                   },
                   marginRight: 2,
                 }}
-                href="https://github.com/DP-NOTHING/WebWatch.git"
+                href="https://github.com/DP-NOTHING/SiteSync.git"
                 target="_blank"
                 rel="noopener noreferrer"
               >

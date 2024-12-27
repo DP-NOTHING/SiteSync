@@ -117,21 +117,26 @@ import { format } from "date-fns";
 import { SiteDetail } from "../types";
 import { ArrowUpRight, Users, Globe, GitBranch, Calendar } from "lucide-react";
 const ContentContainer = styled(Box)({
+  flexGrow: 1,
+  height: "100vh", // Full viewport height
+  overflow: "hidden", // Prevent container scroll
   display: "flex",
   flexDirection: "column",
-  height: "100%",
-  overflow: "hidden",
 });
 
 const ScrollableContent = styled(Box)({
+  padding: "20px",
   flexGrow: 1,
-  overflowY: "auto",
+  overflowY: "auto", // Enable vertical scrolling
   "&::-webkit-scrollbar": {
     width: "6px",
   },
   "&::-webkit-scrollbar-thumb": {
-    backgroundColor: "#bdbdbd",
+    backgroundColor: "#4a5568",
     borderRadius: "3px",
+  },
+  "&::-webkit-scrollbar-track": {
+    backgroundColor: "#2d3748",
   },
 });
 
@@ -169,7 +174,15 @@ const SiteDetails: React.FC<SiteDetailsProps> = ({ selectedSite }) => {
     return (
       <ContentContainer>
         <ScrollableContent>
-          <Box sx={{ padding: 3 }}>
+          <Box
+            sx={{
+              p: 3,
+              height: "100vh",
+              color: "#fff",
+              background:
+                "linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #2d1b3d 100%)",
+            }}
+          >
             <Typography variant="h6">Select a site to view details</Typography>
           </Box>
         </ScrollableContent>
@@ -196,8 +209,18 @@ const SiteDetails: React.FC<SiteDetailsProps> = ({ selectedSite }) => {
   return (
     <ContentContainer>
       <ScrollableContent>
-        <Box sx={{ p: 3, height: "100vh", bgcolor: "#f5f5f5" }}>
-          <Paper elevation={0} sx={{ p: 3, mb: 3 }}>
+        <Box
+          sx={{
+            p: 3,
+            height: "100vh",
+            color: "#fff",
+            background: "#0a091a",
+          }}
+        >
+          <Paper
+            elevation={0}
+            sx={{ p: 3, mb: 3, backgroundColor: "#2d2c33", color: "white" }}
+          >
             <Typography variant="h5" fontWeight="bold" gutterBottom>
               {site.projectname}
             </Typography>

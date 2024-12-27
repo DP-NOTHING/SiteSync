@@ -11,6 +11,8 @@ import SiteManagement from "./components/SiteManagement.tsx";
 import DashBoardLayout from "./layout/DashBoardLayout.tsx";
 import path from "path";
 import HeroSection from "./pages/LandingPage/LandingPage.tsx";
+import { Monitor, MonitorSmartphone } from "lucide-react";
+import MonitorManagement from "./pages/MonitorManagement/MonitorManagement.tsx";
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
 if (!PUBLISHABLE_KEY) {
@@ -52,6 +54,20 @@ const router = createBrowserRouter([
           {
             index: true,
             element: <DeploymentForm />,
+          },
+        ],
+      },
+      {
+        path: "/monitors",
+        element: (
+          <CheckAuth>
+            <Outlet />
+          </CheckAuth>
+        ),
+        children: [
+          {
+            index: true,
+            element: <MonitorManagement />,
           },
         ],
       },

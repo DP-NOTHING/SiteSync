@@ -20,10 +20,12 @@ const settings = ["Profile", "Logout"];
 interface NavBarProps {
   setSelectedPage: React.Dispatch<React.SetStateAction<string>>;
   setSelectedSetting: React.Dispatch<React.SetStateAction<string>>;
+  selectedPage: string;
 }
 
 const NavBar: React.FC<NavBarProps> = ({
   setSelectedPage,
+  selectedPage,
   setSelectedSetting,
 }) => {
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
@@ -75,7 +77,7 @@ const NavBar: React.FC<NavBarProps> = ({
               variant="h6"
               noWrap
               component="a"
-              href="#"
+              href="/"
               sx={{
                 mr: 2,
                 display: { xs: "none", md: "flex" },
@@ -117,7 +119,15 @@ const NavBar: React.FC<NavBarProps> = ({
                 sx={{ display: { xs: "block", md: "none" } }}
               >
                 {pages.map((page) => (
-                  <MenuItem key={page} onClick={() => handleNavClick(page)}>
+                  <MenuItem
+                    key={page}
+                    onClick={() => handleNavClick(page)}
+                    sx={{
+                      my: 2,
+                      color: selectedPage === page ? "secondary.main" : "white",
+                      display: "block",
+                    }}
+                  >
                     <Typography sx={{ textAlign: "center" }}>{page}</Typography>
                   </MenuItem>
                 ))}
@@ -129,7 +139,11 @@ const NavBar: React.FC<NavBarProps> = ({
                 <Button
                   key={page}
                   onClick={() => handleNavClick(page)}
-                  sx={{ my: 2, color: "white", display: "block" }}
+                  sx={{
+                    my: 2,
+                    color: selectedPage === page ? "black" : "white",
+                    display: "block",
+                  }}
                 >
                   {page}
                 </Button>

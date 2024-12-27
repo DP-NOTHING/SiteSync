@@ -39,6 +39,7 @@ function App() {
           <NavBar
             setSelectedPage={setSelectedPage}
             setSelectedSetting={setSelectedSetting}
+            selectedPage={selectedPage}
           />
           <Box sx={{ p: 3 }}>
             {renderContent()}
@@ -66,6 +67,7 @@ function App() {
         <NavBar
           setSelectedPage={setSelectedPage}
           setSelectedSetting={setSelectedSetting}
+          selectedPage={selectedPage}
         />
         <Box sx={{ flexGrow: 1, display: "flex", mt: 8 }}>
           {renderContent()}
